@@ -29,7 +29,7 @@ export default function Voices() {
     useEffect(() => {
         const fetchStrings = async () => {
             try {
-                const response = await axios.get('/api/strings');
+                const response = await axios.get('/api/cids');
                 setStrings(response.data.strings);
                 if (response.data.strings.length > 0) {
                     setSelectedString(response.data.strings[0]);
@@ -67,7 +67,7 @@ export default function Voices() {
         }
 
         try {
-            const response = await axios.post('/api/strings', { string: trimmedString });
+            const response = await axios.post('/api/cids', { string: trimmedString });
             setStrings([...strings, trimmedString]);
             setStringInput('');
             setSelectedString(trimmedString);
@@ -95,10 +95,10 @@ export default function Voices() {
 
         try {
             const response = await axios.post(
-                'https://example.com/api/mp3', // Replace with your API
+                'https://chloe-audiogen.hf.space/api/voice-transfer', // Replace with your API
                 {
                     text,
-                    voiceId: selectedString
+                    cid: selectedString
                 },
                 {
                     responseType: 'arraybuffer',
