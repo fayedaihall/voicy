@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { uploadToIPFS } from "../../lib/ipfs";
-// import { callAIApi } from "../../lib/ai";
+import { callAIApi } from "../../lib/ai";
 import { abi as VoiceRegistryABI } from "../../abis/VoiceRegistry.json";
 import { MicrophoneIcon, StopIcon } from "@heroicons/react/24/outline";
 import { getAddress } from "viem";
@@ -30,9 +30,16 @@ const UploadVoice = () => {
                 audioChunksRef.current.push(event.data);
             };
 
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let randomnizedFilename = "recorded-voice-";
+            for (let i = 0; i <= 3; i++) {
+                randomnizedFilename += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            randomnizedFilename += ".webm";
+
             mediaRecorderRef.current.onstop = () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-                const file = new File([audioBlob], "recorded-voice.webm", { type: "audio/webm" });
+                const file = new File([audioBlob], randomnizedFilename, { type: "audio/webm" });
                 setAudioFile(file);
                 stream.getTracks().forEach((track) => track.stop());
             };
