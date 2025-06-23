@@ -3,10 +3,10 @@
 import { useState, useRef } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { uploadToIPFS } from "../../lib/ipfs";
-import { callAIApi } from "../../lib/ai";
 import { abi as VoiceRegistryABI } from "../../abis/VoiceRegistry.json";
 import { MicrophoneIcon, StopIcon } from "@heroicons/react/24/outline";
 import { getAddress } from "viem";
+import { randomInt } from "crypto";
 
 const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
 
@@ -86,13 +86,11 @@ const UploadVoice = () => {
 
         try {
             const ipfsHash = await uploadToIPFS(audioFile);
-            // const modelId = await callAIApi(audioFile);
-            const modelId = 1234; // Placeholder, replace with actual AI call
             await writeContract({
                 address: VOICE_REGISTRY_CONTRACT_ADDRESS,
                 abi: VoiceRegistryABI,
                 functionName: "registerVoice",
-                args: [ipfsHash, BigInt(modelId)],
+                args: [ipfsHash, randomInt(100000)],
             });
             alert("Voice uploaded and registered successfully!");
             setAudioFile(null); // Reset after upload

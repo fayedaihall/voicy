@@ -7,6 +7,8 @@ import { abi as PaymentSplitterABI } from '../../abis/PaymentSplitter.json';
 import { abi as VoiceRegistryABI } from '../../abis/VoiceRegistry.json';
 // import { generateTTS } from '../lib/ai';
 import { getAddress } from "viem";
+// import { callAIApi } from "../../lib/ai";
+
 
 const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xd053239A91E31a1B11c23688a6f9eA5A71f931A8");
 const SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS = getAddress("0xc0c38481cBD93418cA5e0F1Fb1BD1afc1255D150");
@@ -47,12 +49,14 @@ export default function Voices() {
 
     const handleUseVoice = async (voiceId: number) => {
         try {
+            // const { modelId, mp3Blob } = await callAIApi(ipfsHash);
             await writeContract({
                 address: PAYMENT_SPLITTER_CONTRACT_ADDRESS,
                 abi: PaymentSplitterABI,
                 functionName: "useVoice",
                 args: [voiceId],
             });
+
         } catch (error) {
             console.error("Error using voice:", error);
             alert("Failed to use voice. Please try again.");
