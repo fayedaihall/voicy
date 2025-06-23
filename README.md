@@ -13,9 +13,9 @@ Currently working locally with hardhat network:
 
 ## Quickstart
 
-yarn install
-yarn chain
-yarn deploy
-yarn start
+### yarn install
+### yarn chain
+### yarn deploy
+### yarn start
 
 
