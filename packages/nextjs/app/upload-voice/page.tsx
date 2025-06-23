@@ -90,7 +90,7 @@ const UploadVoice = () => {
                 address: VOICE_REGISTRY_CONTRACT_ADDRESS,
                 abi: VoiceRegistryABI,
                 functionName: "registerVoice",
-                args: [ipfsHash, randomInt(100000)],
+                args: [ipfsHash, randomInt(100000).toString()],
             });
             alert("Voice uploaded and registered successfully!");
             setAudioFile(null); // Reset after upload
