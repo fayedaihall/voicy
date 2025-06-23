@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { abi as SubscriptionManagerABI } from '../../abis/SubscriptionManager.json';
 import { abi as PaymentSplitterABI } from '../../abis/PaymentSplitter.json';
@@ -8,6 +7,9 @@ import { abi as VoiceRegistryABI } from '../../abis/VoiceRegistry.json';
 // import { generateTTS } from '../lib/ai';
 import { getAddress } from "viem";
 // import { callAIApi } from "../../lib/ai";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
 
 
 const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xd053239A91E31a1B11c23688a6f9eA5A71f931A8");
@@ -15,108 +17,206 @@ const SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS = getAddress("0xc0c38481cBD93418cA5e
 const PAYMENT_SPLITTER_CONTRACT_ADDRESS = getAddress("0x4c4066452B8bD54423F5991707415d5260FE999f");
 
 export default function Voices() {
-    const { address } = useAccount();
-    const [text, setText] = useState('');
-    const [selectedVoiceId, setSelectedVoiceId] = useState<number | null>(null);
+    const [text, setText] = useState<string>(''); // Text area input
+    const [stringInput, setStringInput] = useState<string>(''); // Input for new strings
+    const [selectedString, setSelectedString] = useState<string>(''); // Selected dropdown value
+    const [strings, setStrings] = useState<string[]>([]); // List of strings for dropdown
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-    const { data: isSubscribed } = useReadContract({
-        address: SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS,
-        abi: SubscriptionManagerABI,
-        functionName: 'isSubscribed',
-        args: [address],
-    });
+    // Fetch strings on mount
+    useEffect(() => {
+        const fetchStrings = async () => {
+            try {
+                const response = await axios.get('/api/strings');
+                setStrings(response.data.strings);
+                if (response.data.strings.length > 0) {
+                    setSelectedString(response.data.strings[0]);
+                }
+            } catch (err) {
+                setError('Failed to load strings');
+                console.error('Error:', err);
+            }
+        };
+        fetchStrings();
+    }, []);
 
-    const { writeContract } = useWriteContract();
-
-    const { data: voices } = useReadContract({
-        address: VOICE_REGISTRY_CONTRACT_ADDRESS,
-        abi: VoiceRegistryABI,
-        functionName: 'registerVoice',
-    });
-
-    const handleSubscribe = async () => {
-        try {
-            await writeContract({
-                address: SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS,
-                abi: SubscriptionManagerABI,
-                functionName: "subscribe",
-            });
-        } catch (error) {
-            console.error("Error subscribing:", error);
-            alert("Failed to subscribe. Please try again.");
-        }
+    // Handle text area change
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setText(e.target.value);
     };
 
-    const handleUseVoice = async (voiceId: number) => {
-        try {
-            // const { modelId, mp3Blob } = await callAIApi(ipfsHash);
-            await writeContract({
-                address: PAYMENT_SPLITTER_CONTRACT_ADDRESS,
-                abi: PaymentSplitterABI,
-                functionName: "useVoice",
-                args: [voiceId],
-            });
-
-        } catch (error) {
-            console.error("Error using voice:", error);
-            alert("Failed to use voice. Please try again.");
-        }
+    // Handle string input change
+    const handleStringInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setStringInput(e.target.value);
     };
 
-    const handleGenerate = async () => {
-        if (!isSubscribed) {
-            await handleSubscribe();
+    // Handle dropdown change
+    const handleStringSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedString(e.target.value);
+    };
+
+    // Add new string
+    const handleAddString = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const trimmedString = stringInput.trim();
+        if (!trimmedString) {
+            setError('Please enter a valid string');
             return;
         }
-        if (selectedVoiceId && text) {
-            await handleUseVoice(selectedVoiceId);
-            // const audioUrl = await generateTTS(text, selectedVoiceId);
-            const audioUrl = "https://example.com";
-            // Play or download audio
-            const audio = new Audio(audioUrl);
-            audio.play();
+
+        try {
+            const response = await axios.post('/api/strings', { string: trimmedString });
+            setStrings([...strings, trimmedString]);
+            setStringInput('');
+            setSelectedString(trimmedString);
+        } catch (err) {
+            setError('Failed to add string');
+            console.error('Error:', err);
         }
     };
 
+    // Handle text-to-MP3 submission
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!text.trim()) {
+            setError('Please enter some text');
+            return;
+        }
+        if (!selectedString) {
+            setError('Please select a voice ID');
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        setAudioUrl(null);
+
+        try {
+            const response = await axios.post(
+                'https://example.com/api/mp3', // Replace with your API
+                {
+                    text,
+                    voiceId: selectedString
+                },
+                {
+                    responseType: 'arraybuffer',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            const mp3Blob = new Blob([response.data], { type: 'audio/mpeg' });
+            const contentType = response.headers['content-type'];
+            if (contentType !== 'audio/mpeg' && contentType !== 'audio/mp3') {
+                console.warn(`Unexpected Content-Type: ${contentType}`);
+            }
+
+            const url = URL.createObjectURL(mp3Blob);
+            setAudioUrl(url);
+        } catch (err) {
+            setError('Failed to fetch MP3');
+            console.error('Error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Handle download
+    const handleDownload = () => {
+        if (audioUrl && selectedString) {
+            const link = document.createElement('a');
+            link.href = audioUrl;
+            // Sanitize selectedString for filename
+            const safeString = selectedString.replace(/[^a-zA-Z0-9-_]/g, '_');
+            link.download = `audio_${safeString}.mp3`;
+            link.click();
+        }
+    };
+
+    // Clean up URL
+    useEffect(() => {
+        return () => {
+            if (audioUrl) {
+                URL.revokeObjectURL(audioUrl);
+            }
+        };
+    }, [audioUrl]);
+
     return (
-        <div className="flex items-center flex-col grow pt-10 px-5">
-            <h1 className="text-center text-4xl font-bold mb-8">Browse Voices</h1>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-md rounded-3xl">
-                {!address && <p className="text-red-500 mb-4">Please connect your wallet to browse voices.</p>}
-                {!isSubscribed && (
-                    <button onClick={handleSubscribe} className="btn btn-primary mb-4">
-                        Subscribe ($5 USDC/month)
-                    </button>
-                )}
-                <select
-                    onChange={(e) => setSelectedVoiceId(Number(e.target.value))}
-                    className="select select-bordered w-full mb-4"
-                    disabled={!isSubscribed || !address}
-                >
-                    <option value="" disabled selected>
-                        Select a voice
-                    </option>
-                    {Array.from({ length: Number(voices) || 0 }, (_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                            Voice #{i + 1}
-                        </option>
-                    ))}
-                </select>
-                <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter text for text-to-speech"
-                    className="textarea textarea-bordered w-full mb-4"
-                    disabled={!isSubscribed || !address}
+        <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+            <h1>Text to MP3 Converter</h1>
+
+            {/* Form to add new string */}
+            <form onSubmit={handleAddString} style={{ marginBottom: '20px' }}>
+                <label htmlFor="stringInput">Add Voice ID:</label>
+                <input
+                    id="stringInput"
+                    type="text"
+                    value={stringInput}
+                    onChange={handleStringInputChange}
+                    placeholder="e.g., en-US-Jenny"
+                    style={{ margin: '0 10px', width: '200px' }}
                 />
-                <button
-                    onClick={handleGenerate}
-                    disabled={!isSubscribed || !selectedVoiceId || !text || !address}
-                    className="btn btn-primary"
+                <button type="submit">Add</button>
+            </form>
+
+            {/* Dropdown for strings */}
+            <div style={{ marginBottom: '20px' }}>
+                <label htmlFor="stringSelect">Select Voice ID:</label>
+                <select
+                    id="stringSelect"
+                    value={selectedString}
+                    onChange={handleStringSelect}
+                    style={{ marginLeft: '10px' }}
+                    disabled={strings.length === 0}
                 >
-                    Generate Audio
-                </button>
+                    {strings.length === 0 ? (
+                        <option value="">No voice IDs available</option>
+                    ) : (
+                        strings.map(str => (
+                            <option key={str} value={str}>
+                                {str}
+                            </option>
+                        ))
+                    )}
+                </select>
             </div>
+
+            {/* Text-to-MP3 form */}
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="textInput">Enter Text:</label>
+                    <br />
+                    <textarea
+                        id="textInput"
+                        value={text}
+                        onChange={handleTextChange}
+                        rows={5}
+                        cols={50}
+                        placeholder="Type your text here..."
+                        style={{ width: '100%', marginBottom: '10px' }}
+                    />
+                </div>
+                <button type="submit" disabled={loading || !selectedString}>
+                    {loading ? 'Processing...' : 'Generate MP3'}
+                </button>
+            </form>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            {audioUrl && (
+                <div style={{ marginTop: '20px' }}>
+                    <h3>Generated Audio (Voice ID: {selectedString})</h3>
+                    <audio controls src={audioUrl} />
+                    <br />
+                    <button onClick={handleDownload} style={{ marginTop: '10px' }}>
+                        Download MP3
+                    </button>
+                </div>
+            )}
         </div>
     );
-}
+};

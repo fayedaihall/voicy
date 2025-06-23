@@ -7,6 +7,7 @@ import { abi as VoiceRegistryABI } from "../../abis/VoiceRegistry.json";
 import { MicrophoneIcon, StopIcon } from "@heroicons/react/24/outline";
 import { getAddress } from "viem";
 import { randomInt } from "crypto";
+import axios from "axios";
 
 const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
 
@@ -92,12 +93,23 @@ const UploadVoice = () => {
                 functionName: "registerVoice",
                 args: [ipfsHash, randomInt(100000).toString()],
             });
+
             alert("Voice uploaded and registered successfully!");
             setAudioFile(null); // Reset after upload
+
+            try {
+                const response = await axios.post('/api/cids', { string: ipfsHash });
+            } catch (err) {
+                alert('Failed to add string');
+                console.error('Error:', err);
+            }
+
         } catch (error) {
             console.error("Error uploading voice:", error);
             alert("Failed to upload voice. Please try again.");
         }
+
+
     };
 
     return (
