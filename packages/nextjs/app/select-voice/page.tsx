@@ -29,7 +29,7 @@ export default function Voices() {
     const { data: voices } = useReadContract({
         address: VOICE_REGISTRY_CONTRACT_ADDRESS,
         abi: VoiceRegistryABI,
-        functionName: 'voiceCount',
+        functionName: 'registerVoice',
     });
 
     const handleSubscribe = async () => {
