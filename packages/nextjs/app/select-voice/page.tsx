@@ -67,7 +67,7 @@ export default function Voices() {
         }
 
         try {
-            const response = await axios.post('/api/cids', { string: trimmedString });
+            await axios.post('/api/cids', { string: trimmedString });
             setStrings([...strings, trimmedString]);
             setStringInput('');
             setSelectedString(trimmedString);
@@ -147,21 +147,7 @@ export default function Voices() {
 
     return (
         <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-            <h1>Text to MP3 Converter</h1>
-
-            {/* Form to add new string */}
-            <form onSubmit={handleAddString} style={{ marginBottom: '20px' }}>
-                <label htmlFor="stringInput">Add Voice ID:</label>
-                <input
-                    id="stringInput"
-                    type="text"
-                    value={stringInput}
-                    onChange={handleStringInputChange}
-                    placeholder="e.g., en-US-Jenny"
-                    style={{ margin: '0 10px', width: '200px' }}
-                />
-                <button type="submit">Add</button>
-            </form>
+            <h1>Choose a voice:</h1>
 
             {/* Dropdown for strings */}
             <div style={{ marginBottom: '20px' }}>
