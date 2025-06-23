@@ -1,20 +1,19 @@
 "use client";
 
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import { abi as SubscriptionManagerABI } from '../../abis/SubscriptionManager.json';
-import { abi as PaymentSplitterABI } from '../../abis/PaymentSplitter.json';
-import { abi as VoiceRegistryABI } from '../../abis/VoiceRegistry.json';
+// import { useAccount, useReadContract, useWriteContract } from 'wagmi';
+// import { abi as SubscriptionManagerABI } from '../../abis/SubscriptionManager.json';
+// import { abi as PaymentSplitterABI } from '../../abis/PaymentSplitter.json';
+// import { abi as VoiceRegistryABI } from '../../abis/VoiceRegistry.json';
 // import { generateTTS } from '../lib/ai';
-import { getAddress } from "viem";
+// import { getAddress } from "viem";
 // import { callAIApi } from "../../lib/ai";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 
-
-const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xd053239A91E31a1B11c23688a6f9eA5A71f931A8");
-const SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS = getAddress("0xc0c38481cBD93418cA5e0F1Fb1BD1afc1255D150");
-const PAYMENT_SPLITTER_CONTRACT_ADDRESS = getAddress("0x4c4066452B8bD54423F5991707415d5260FE999f");
+// const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xd053239A91E31a1B11c23688a6f9eA5A71f931A8");
+// const SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS = getAddress("0xc0c38481cBD93418cA5e0F1Fb1BD1afc1255D150");
+// const PAYMENT_SPLITTER_CONTRACT_ADDRESS = getAddress("0x4c4066452B8bD54423F5991707415d5260FE999f");
 
 export default function Voices() {
     const [text, setText] = useState<string>(''); // Text area input
@@ -48,7 +47,7 @@ export default function Voices() {
     };
 
     // Handle string input change
-    const handleStringInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
         setStringInput(e.target.value);
     };
 
@@ -58,7 +57,7 @@ export default function Voices() {
     };
 
     // Add new string
-    const handleAddString = async (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmedString = stringInput.trim();
         if (!trimmedString) {

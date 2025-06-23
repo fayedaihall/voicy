@@ -128,7 +128,7 @@ export const useScaffoldEventHistory = <
     },
     enabled: enabled && isContractAddressAndClientReady,
     initialPageParam: fromBlock,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    getNextPageParam: (lastPage, lastPageParam) => {
       if (!blockNumber || fromBlock >= blockNumber) return undefined;
 
       const lastPageHighestBlock = Math.max(

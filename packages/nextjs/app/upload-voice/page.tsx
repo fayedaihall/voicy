@@ -98,7 +98,7 @@ const UploadVoice = () => {
             setAudioFile(null); // Reset after upload
 
             try {
-                const response = await axios.post('/api/cids', { string: ipfsHash });
+                await axios.post('/api/cids', { string: ipfsHash });
             } catch (err) {
                 alert('Failed to add string');
                 console.error('Error:', err);
