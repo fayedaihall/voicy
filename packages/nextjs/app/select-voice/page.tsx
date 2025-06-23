@@ -8,10 +8,10 @@ import { abi as VoiceRegistryABI } from '../../abis/VoiceRegistry.json';
 // import { generateTTS } from '../lib/ai';
 import { getAddress } from "viem";
 
-const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
-const MOCK_USDC_CONTRACT_ADDRESS = getAddress("0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
-const SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS = getAddress("0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9");
-const PAYMENT_SPLITTER_CONTRACT_ADDRESS = getAddress("0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9");
+const VOICE_REGISTRY_CONTRACT_ADDRESS = getAddress("0xd053239A91E31a1B11c23688a6f9eA5A71f931A8");
+const MOCK_USDC_CONTRACT_ADDRESS = getAddress("0xE2486310Ec973708A5252d471069eB7e78E22ecc");
+const SUBSCRIPTION_MANAGER_CONTRACT_ADDRESS = getAddress("0xc0c38481cBD93418cA5e0F1Fb1BD1afc1255D150");
+const PAYMENT_SPLITTER_CONTRACT_ADDRESS = getAddress("0x4c4066452B8bD54423F5991707415d5260FE999f");
 
 export default function Voices() {
     const { address } = useAccount();
