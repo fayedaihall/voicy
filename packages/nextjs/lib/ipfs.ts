@@ -1,17 +1,22 @@
-// "server only";
-// import { PinataSDK } from "pinata";
-// export const pinata = new PinataSDK({
-//   pinataJwt: `${process.env.PINATA_JWT}`,
-//   pinataGateway: `${process.env.NEXT_PUBLIC_GATEWAY_URL}`,
-// });
-import { PinataSDK } from "pinata";
-
-const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT,
-  pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL,
-});
-
 export async function uploadToIPFS(file: File): Promise<string> {
-  const upload = await pinata.upload.public.file(file);
-  return upload.cid;
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload-ipfs", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to pin file to IPFS");
+    }
+
+    return data.ipfsHash;
+  } catch (error) {
+    console.error("Error uploading to IPFS:", error);
+    throw new Error("Failed to pin file to IPFS");
+  }
 }
