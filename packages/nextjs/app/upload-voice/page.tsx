@@ -20,17 +20,6 @@ const UploadVoice = () => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const { writeContract } = useWriteContract();
 
-    try {
-        const { write: registerVoice } = writeContract({
-            address: VOICE_REGISTRY_CONTRACT_ADDRESS,
-            abi: VoiceRegistryABI,
-            functionName: "registerVoice",
-            args: ["0xaddress"],
-        });
-    } catch (error) {
-        console.log((error as Error).message)
-    }
-
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -91,8 +80,13 @@ const UploadVoice = () => {
         try {
             const ipfsHash = await uploadToIPFS(audioFile);
             // const modelId = await callAIApi(audioFile);
-            const modelId = 1234;
-            registerVoice({ args: [ipfsHash, modelId] });
+            const modelId = 1234; // Placeholder, replace with actual AI call
+            await writeContract({
+                address: VOICE_REGISTRY_CONTRACT_ADDRESS,
+                abi: VoiceRegistryABI,
+                functionName: "registerVoice",
+                args: [ipfsHash, BigInt(modelId)],
+            });
             alert("Voice uploaded and registered successfully!");
             setAudioFile(null); // Reset after upload
         } catch (error) {
