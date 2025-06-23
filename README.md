@@ -4,7 +4,7 @@
 
 ⚙️ Built using Scaffold-ETH, NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
 
-Currently working locally with hardhat network:
+Currently works locally with hardhat network:
 
 ## Quickstart
 
