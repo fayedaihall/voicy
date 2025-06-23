@@ -46,11 +46,6 @@ export default function Voices() {
         setText(e.target.value);
     };
 
-    // Handle string input change
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-        setStringInput(e.target.value);
-    };
-
     // Handle dropdown change
     const handleStringSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedString(e.target.value);
