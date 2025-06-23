@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
 import { MicrophoneIcon } from "@heroicons/react/24/outline";
 
 const Home: NextPage = () => {
